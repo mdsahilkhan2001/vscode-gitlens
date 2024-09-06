@@ -67,6 +67,8 @@ export function getSubscriptionStateString(state: SubscriptionState | undefined)
 			return 'trial-reactivation-eligible';
 		case SubscriptionState.Paid:
 			return 'paid';
+		case SubscriptionState.PaidExpired:
+			return 'paid-expired';
 		default:
 			return 'unknown';
 	}
@@ -97,6 +99,10 @@ export function computeSubscriptionState(subscription: Optional<Subscription, 's
 			case SubscriptionPlanId.Pro:
 			case SubscriptionPlanId.Teams:
 			case SubscriptionPlanId.Enterprise:
+				if (effective.expiresOn != null && new Date(effective.expiresOn) < new Date()) {
+					return SubscriptionState.PaidExpired;
+				}
+
 				return SubscriptionState.Paid;
 		}
 	}
@@ -120,6 +126,10 @@ export function computeSubscriptionState(subscription: Optional<Subscription, 's
 
 		case SubscriptionPlanId.Teams:
 		case SubscriptionPlanId.Enterprise:
+			if (effective.expiresOn != null && new Date(effective.expiresOn) < new Date()) {
+				return SubscriptionState.PaidExpired;
+			}
+
 			return SubscriptionState.Paid;
 	}
 }
