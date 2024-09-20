@@ -141,6 +141,7 @@ export function getSubscriptionFromCheckIn(
 			license.organizationId,
 			new Date(license.latestStartDate),
 			new Date(license.latestEndDate),
+			license.latestStatus === 'trial' || license.latestStatus === 'in_trial',
 		);
 	}
 
@@ -177,6 +178,7 @@ export function getSubscriptionFromCheckIn(
 			new Date(license.latestEndDate),
 			license.latestStatus === 'cancelled',
 			license.nextOptInDate ?? data.nextOptInDate,
+			license.latestStatus === 'trial' || license.latestStatus === 'in_trial',
 		);
 	}
 
