@@ -52,6 +52,7 @@ import { executeCommand } from '../../system/vscode/command';
 import { configuration } from '../../system/vscode/configuration';
 import { openUrl } from '../../system/vscode/utils';
 import { getApplicablePromo } from '../gk/account/promos';
+import { getPullRequestIdentityValuesFromSearch } from '../integrations/providers/github';
 import type { IntegrationId } from '../integrations/providers/models';
 import {
 	HostingIntegrationId,
@@ -561,6 +562,25 @@ export class LaunchpadCommand extends QuickCommand<State> {
 				if (groupsHidden != hideGroups) {
 					groupsHidden = hideGroups;
 					quickpick.items = hideGroups ? items.filter(i => !isDirectiveQuickPickItem(i)) : items;
+				const { value } = quickpick;
+				const activeLaunchpadItems = quickpick.activeItems.filter(
+					(i): i is LaunchpadItemQuickPickItem => 'item' in i,
+				);
+				if (value?.length && !activeLaunchpadItems.length) {
+					const { prNumber } = getPullRequestIdentityValuesFromSearch(value);
+					if (prNumber != null) {
+						const launchpadItems = quickpick.items.filter(
+							(i): i is LaunchpadItemQuickPickItem => 'item' in i,
+						);
+						const item = launchpadItems.find(i => i.item.id === prNumber);
+						if (item != null) {
+							if (!item.alwaysShow) {
+								item.alwaysShow = true;
+								// This is a hack because the quickpick doesn't update until you change the items
+								quickpick.items = [...quickpick.items];
+							}
+						}
+					}
 				}
 
 				return true;
